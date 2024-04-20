@@ -1,27 +1,47 @@
 pipeline {
     agent any
+
     environment {
- PATH="${PATH}:/opt/maven/bin"
-}
+        // Define environment variables
+        TOMCAT_HOST = '54.191.238.249'
+        TOMCAT_PORT = '8080'
+        TOMCAT_USER = 'ubuntu'
+
+        GITHUB_REPO = 'https://github.com/yadhu870/jenkins-project.git'
+    }
+
     stages {
-        stage('git clone') {
+        stage('Fetch Code') {
             steps {
-               git 'https://github.com/yadhu870/jenkins-project.git'
+                // Clone the GitHub repository
+                git 'https://github.com/' + "${GITHUB_REPO}"
             }
         }
-        stage('bulid') {
+
+        stage('Build with Maven') {
             steps {
-               sh "mvn clean package"
+                // Build the project with Maven
+                sh 'mvn clean package'
+            }
+        }
+
+        stage('Deploy to Tomcat') {
+            steps {
+                script {
+                    // Use SSH Agent to deploy to Tomcat
+                    sshagent(['your_ssh_credentials']) {
+                        // Copy the WAR file to the Tomcat webapps directory
+                        sh "scp target/webapp.war ${TOMCAT_USER}@${TOMCAT_HOST}:/opt/tomcat/webapps/"
+                    }
+                }
+            }
         }
     }
-    stage('deploy') {
-    steps {
-        script {
-        sshagent(['9eaadda4-0431-4c92-b269-eb067861375f']) {
-            sh 'scp -o StrictHostKeyChecking=no target/webapp.war ubuntu@54.191.238.249:/opt/tomcat/webapps/'
+
+    post {
+        always {
+            // Clean up workspace
+            cleanWs()
         }
-      }
-   }
-  }
- }
+    }
 }
