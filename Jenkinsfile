@@ -1,7 +1,8 @@
 pipeline {
  agent any
  environment {
- PATH="${PATH}:/opt/apache-maven-3.6.3/bin"
+
+  PATH="${PATH}:/opt/apache-maven-3.6.3/bin"
  }
  stages {
  stage('Git Clone') {
@@ -19,7 +20,7 @@ url: 'https://github.com/yadhu870/jenkins-test.git'
  stage("deploy to tomcat"){
      steps{
          sshagent(['tomcat-user']) {
-     sh 'scp -o StrictHostKeyChecking=no target/webapp.war root@35.91.144.46:/opt/tomcat/webapps/'
+     sh 'scp -o StrictHostKeyChecking=no target/webapp.war root@34.211.47.173:/opt/tomcat/webapps/'
 }
      }
  }
